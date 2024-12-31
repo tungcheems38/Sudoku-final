@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include "ilcplex\cplex.h"
 #include "ilcplex\ilocplex.h"
 using namespace std;
@@ -8,7 +8,7 @@ int main()
 	IloEnv myenv; // environment object
 	IloModel mymodel(myenv); // model object
 	IloArray<IloArray<IloNumVarArray>> x(myenv, 9);
-
+	int num_guard;
 	int puzzle[9][9] = {
 	{0, 6, 0, 1, 0, 4, 0, 5, 0},
 	{0, 0, 8, 3, 0, 5, 6, 0, 0},
@@ -52,15 +52,18 @@ int main()
 			}
 		}
 	// Lớp constraint 3: Đảm bảo các subgrid có tổng bằng 1
-	for (int k = 0; k < 9; ++k) {
-		IloExpr expr3(myenv);
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 3; ++j) {
-				expr3 += x[i][j][k];
+	for (int k = 0; k < 9; k++) {
+		for (int g = 0; g < 9; g += 3) {
+			IloExpr expr3(myenv);
+			for (int i = g; i < g + 3; ++i) {
+				for (int j = g; j < g + 3; ++j) {
+					expr3 += x[i][j][k];
+				}
 			}
-		}
 			mymodel.add(expr3 == 1);
+		}
 	}
+
 	// Lớp constraint 4: Mỗi ô chỉ có một số được điền
 	for (int i = 0; i < 9; ++i) {
 		for (int j = 0; j < 9; ++j) {
@@ -104,4 +107,5 @@ int main()
 	// Closing the Model
 	myenv.end();
 	return 0;
-}
+}
+
